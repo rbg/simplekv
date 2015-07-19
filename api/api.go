@@ -5,6 +5,7 @@ import (
 
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
+	"github.com/rbg/simplekv/store"
 	"github.com/stackengine/selog"
 )
 
@@ -26,6 +27,7 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 type ApiServer struct {
 	addr string
 	s    *negroni.Negroni
+	be   store.Store
 }
 
 func (api_server *ApiServer) Run() {
@@ -33,8 +35,8 @@ func (api_server *ApiServer) Run() {
 	http.ListenAndServe(api_server.addr, api_server.s)
 }
 
-func NewServer() *ApiServer {
-	api_server := &ApiServer{}
+func NewServer(be store.Store) *ApiServer {
+	api_server := &ApiServer{be: be}
 
 	api := mux.NewRouter()
 	api.NotFoundHandler = http.HandlerFunc(notFound)

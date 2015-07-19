@@ -6,7 +6,8 @@ import (
 )
 
 func main() {
-	selog.SetLevel("all", selog.Debug)
-	kv_api := simplekv.NewServer()
+	selog.setLevel("all", selog.Debug)
+	be := NewMem()
+	kv_api := simplekv.NewServer(be)
 	kv_api.Run()
 }
