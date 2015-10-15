@@ -1,5 +1,9 @@
 package store
 
+import "github.com/stackengine/selog"
+
+var slog = selog.Register("store", 0)
+
 type Store interface {
 	Keys() ([]string, error)
 	Get(key string) ([]byte, error)

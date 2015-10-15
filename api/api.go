@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	api_endpoint = ":7008"
+	api_endpoint = ":1964"
 )
 
 var (
@@ -33,6 +33,7 @@ type ApiServer struct {
 func (api_server *ApiServer) Run() {
 	slog.Println("Starting: ", api_server.addr)
 	http.ListenAndServe(api_server.addr, api_server.s)
+	slog.Println("exit run: ", api_server.addr)
 }
 
 func NewServer(be store.Store) *ApiServer {
