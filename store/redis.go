@@ -1,42 +1,72 @@
 package store
 
-import "gopkg.in/redis.v3"
+import redis "gopkg.in/redis.v3"
 
 type redis_be struct {
-	clnt *redis.Client
+	write *redis.Client
+	read  *redis.Client
 }
 
-func NewRedis() Store {
-	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:7008",
+func NewRedis(write_ep string, read_ep string) Store {
+
+	be := &redis_be{}
+
+	// figure out how to setup
+	if len(read_ep) > 0 {
+		be.read = redis.NewClient(&redis.Options{
+			Addr:     read_ep,
+			Password: "",
+			DB:       0,
+		})
+		if be.read == nil {
+			panic("failed to redis")
+		}
+		if pong, err := be.read.Ping().Result(); err != nil {
+			slog.Printf("READ Ping reply: %s", pong)
+		} else {
+			slog.ErrPrintf("READ Ping reply error: %s", err)
+			return nil
+		}
+	}
+
+	if len(write_ep) == 0 {
+		write_ep = "localhost:6379"
+	}
+
+	if be.write = redis.NewClient(&redis.Options{
+		Addr:     write_ep,
 		Password: "",
 		DB:       0,
-	})
-
-	if client == nil {
+	}); be.write == nil {
 		panic("failed to redis")
 	}
-	pong, err := client.Ping().Result()
-	slog.Println(pong, err)
 
-	return &redis_be{
-		clnt: client,
+	pong := be.write.Ping()
+	if err := pong.Err(); err != nil {
+		slog.ErrPrintf("WRITE Ping reply error: %s", err)
+		return nil
 	}
+
+	if be.read == nil {
+		be.read = be.write
+	}
+
+	return be
 }
 
 func (r *redis_be) Get(key string) ([]byte, error) {
-	result := r.clnt.HGet("root", key)
+	result := r.read.HGet("root", key)
 	return result.Bytes()
 }
 
 func (r *redis_be) Put(key string, val []byte) error {
-	return r.clnt.HSet("root", key, string(val)).Err()
+	return r.write.HSet("root", key, string(val)).Err()
 }
 
 func (r *redis_be) Delete(key string) error {
-	return r.clnt.HDel("root", key).Err()
+	return r.write.HDel("root", key).Err()
 }
 
 func (r *redis_be) Keys() ([]string, error) {
-	return r.clnt.HKeys("root").Result()
+	return r.read.HKeys("root").Result()
 }

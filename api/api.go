@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	api_endpoint = ":1964"
+	api_endpoint = ":7800"
 )
 
 var (
@@ -36,14 +36,18 @@ func (api_server *ApiServer) Run() {
 	slog.Println("exit run: ", api_server.addr)
 }
 
-func NewServer(be store.Store) *ApiServer {
+func NewServer(be store.Store, ep *string) *ApiServer {
 	api_server := &ApiServer{be: be}
 
 	api := mux.NewRouter()
 	api.NotFoundHandler = http.HandlerFunc(notFound)
 	api.HandleFunc("/api/kv/keys/", api_server.KVkeys).Methods("GET")
 	api.HandleFunc("/api/kv/{key}", api_server.KVrequest).Methods("GET", "PUT", "POST", "DELETE")
-	api_server.addr = api_endpoint
+	if ep != nil {
+		api_server.addr = *ep
+	} else {
+		api_server.addr = api_endpoint
+	}
 	api_server.s = negroni.New()
 	api_server.s.UseHandler(api)
 	return api_server
