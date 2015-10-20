@@ -62,7 +62,7 @@ func (ap *ApiServer) KVrequest(w http.ResponseWriter, r *http.Request) {
 	case "DELETE":
 		err = ap.be.Delete(keyID)
 
-	case "PUT":
+	case "PUT", "POST":
 		bs, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			msg := "Unable to read url body"
