@@ -42,7 +42,7 @@ func NewServer(be store.Store, ep *string) *ApiServer {
 	api := mux.NewRouter()
 	api.NotFoundHandler = http.HandlerFunc(notFound)
 	api.HandleFunc("/api/kv/keys/", api_server.KVkeys).Methods("GET")
-	api.HandleFunc("/api/kv/{key}", api_server.KVrequest).Methods("GET", "PUT", "POST", "DELETE")
+	api.HandleFunc("/api/kv/keys/{key}", api_server.KVrequest).Methods("GET", "PUT", "POST", "DELETE")
 	if ep != nil {
 		api_server.addr = *ep
 	} else {
