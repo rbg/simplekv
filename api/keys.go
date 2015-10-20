@@ -71,14 +71,14 @@ func (ap *ApiServer) KVrequest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if payload, err := json.Marshal(bs); err != nil {
+		payload, err := json.Marshal(bs)
+		if err != nil {
 			msg := "Unable to jsonify body"
 			slog.ErrPrintf("%s: %s", msg, err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
-		} else {
-			err = ap.be.Put(keyID, payload)
 		}
+		err = ap.be.Put(keyID, payload)
 
 	default:
 		http.Error(w, "Method not supported", http.StatusBadRequest)
