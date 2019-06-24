@@ -39,6 +39,17 @@ func MemKV(c *cli.Context) {
 	}
 }
 
+func BuntKV(c *cli.Context) {
+	if c.Bool("dbg") {
+		selog.SetLevel("all", selog.Debug)
+	} else {
+		selog.SetLevel("all", selog.Info)
+	}
+	if be := store.NewBuntDB(); be != nil {
+		startServer(c, be)
+	}
+}
+
 func RedisKV(c *cli.Context) {
 	if c.Bool("dbg") {
 		selog.SetLevel("all", selog.Debug)
@@ -91,6 +102,22 @@ func main() {
 			ShortName: "m",
 			Usage:     "start up a memory backed simplekv",
 			Action:    MemKV,
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "dbg, d",
+					Usage: "turn on debugging",
+				},
+
+				cli.StringFlag{
+					Name:   "api-endpoint, api",
+					EnvVar: "API_ENDPOINT",
+					Usage:  "endpoint of where to listen for requests."},
+			}},
+		{
+			Name:      "buntdb",
+			ShortName: "b",
+			Usage:     "start up a memory backed buntdb simplekv",
+			Action:    BuntKV,
 			Flags: []cli.Flag{
 				cli.BoolFlag{
 					Name:  "dbg, d",
