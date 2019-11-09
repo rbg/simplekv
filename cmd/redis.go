@@ -18,10 +18,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package main
+package cmd
 
-import "github.com/rbg/simplekv/cmd"
+import (
+	"github.com/apex/log"
+	"github.com/rbg/simplekv/api"
+	"github.com/rbg/simplekv/store"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
 
-func main() {
-	cmd.Execute()
+// redisCmd represents the redis command
+var redisCmd = &cobra.Command{
+	Use:   "redis",
+	Short: "Start up a redis backed simplekv",
+	Long:  "Start up a redis backed simplekv",
+	Run:   redisKV,
+}
+
+func init() {
+	RootCmd.AddCommand(redisCmd)
+
+	redisCmd.PersistentFlags().String("rw", "localhost:6379", "Read/Write endpoint")
+	viper.BindPFlag("rw", redisCmd.Flags().Lookup("rw"))
+
+	redisCmd.PersistentFlags().String("ro", "", "Read only endpoint")
+	viper.BindPFlag("ro", redisCmd.Flags().Lookup("ro"))
+}
+
+func redisKV(cmd *cobra.Command, args []string) {
+
+	if viper.GetBool("debug") {
+		log.SetLevel(log.DebugLevel)
+	}
+
+	if be := store.NewRedis(
+		viper.GetString("rw"),
+		viper.GetString("ro")); be != nil {
+		if kvapi := api.New(be, viper.GetString("api")); kvapi != nil {
+			kvapi.Run()
+		}
+	}
 }

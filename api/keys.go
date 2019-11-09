@@ -1,4 +1,4 @@
-package simplekv
+package api
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sort"
 
+	"github.com/apex/log"
 	"github.com/gorilla/mux"
 )
 
@@ -13,7 +14,7 @@ var (
 	Mstore = make(map[string][]byte)
 )
 
-func (ap *ApiServer) KVkeys(w http.ResponseWriter, r *http.Request) {
+func (ap *Server) KVkeys(w http.ResponseWriter, r *http.Request) {
 	var (
 		err      error
 		jsondata []byte
@@ -26,7 +27,7 @@ func (ap *ApiServer) KVkeys(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		slog.ErrPrintln(err)
+		log.Infof("Keys Error; %s", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	} else {
 		w.Header().Set("Content-type", "application/json")
@@ -35,12 +36,12 @@ func (ap *ApiServer) KVkeys(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (ap *ApiServer) KVrequest(w http.ResponseWriter, r *http.Request) {
+func (ap *Server) KVrequest(w http.ResponseWriter, r *http.Request) {
 	var (
 		err      error
 		jsondata []byte
 	)
-	slog.Printf("Request: req %#v", r)
+	log.Debugf("Request: req %#v", r)
 	vars := mux.Vars(r)
 	keyID := vars["key"]
 
@@ -49,7 +50,7 @@ func (ap *ApiServer) KVrequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slog.Println("Key is: ", keyID)
+	log.Debugf("KeyID; %s", keyID)
 
 	switch r.Method {
 	case "GET":
@@ -66,7 +67,7 @@ func (ap *ApiServer) KVrequest(w http.ResponseWriter, r *http.Request) {
 		bs, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			msg := "Unable to read url body"
-			slog.ErrPrintf("%s: %s", msg, err)
+			log.Infof("%s: %s", msg, err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -74,7 +75,7 @@ func (ap *ApiServer) KVrequest(w http.ResponseWriter, r *http.Request) {
 		payload, err := json.Marshal(bs)
 		if err != nil {
 			msg := "Unable to jsonify body"
-			slog.ErrPrintf("%s: %s", msg, err)
+			log.Infof("%s: %s", msg, err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -93,5 +94,5 @@ func (ap *ApiServer) KVrequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	w.Write(jsondata)
 	w.Write([]byte("\n"))
-	slog.Printf("Sending: %#v", jsondata)
+	log.Debugf("Sending: %#v", jsondata)
 }

@@ -1,54 +1,60 @@
-package simplekv
+package api
 
 import (
 	"net/http"
 
+	"github.com/apex/log"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/rbg/simplekv/store"
-	"github.com/stackengine/selog"
 )
 
 const (
-	api_endpoint = ":7800"
-)
-
-var (
-	slog = selog.Register("simplekv", 0)
+	apiEp = ":7800"
 )
 
 func notFound(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	slog.Println("404 NOT FOUND: ", r.RequestURI)
-	slog.Println("VARS: ", vars)
+	log.Infof("404 NOT FOUND: %s", r.RequestURI)
+	log.Infof("VARS: %+#v", vars)
 	http.Error(w, "No matching request found", http.StatusNotFound)
 }
 
-type ApiServer struct {
+// Server is the Rest instance
+type Server struct {
 	addr string
 	s    *negroni.Negroni
 	be   store.Store
 }
 
-func (api_server *ApiServer) Run() {
-	slog.Println("Starting: ", api_server.addr)
-	http.ListenAndServe(api_server.addr, api_server.s)
-	slog.Println("exit run: ", api_server.addr)
+//Run startup and serves
+func (ap *Server) Run() {
+
+	log.Infof("Starting: %s", ap.addr)
+
+	http.ListenAndServe(ap.addr, ap.s)
+
+	log.Infof("exit run: %s", ap.addr)
+
 }
 
-func NewServer(be store.Store, ep *string) *ApiServer {
-	api_server := &ApiServer{be: be}
-
-	api := mux.NewRouter()
-	api.NotFoundHandler = http.HandlerFunc(notFound)
-	api.HandleFunc("/api/kv/keys/", api_server.KVkeys).Methods("GET")
-	api.HandleFunc("/api/kv/keys/{key}", api_server.KVrequest).Methods("GET", "PUT", "POST", "DELETE")
-	if ep != nil {
-		api_server.addr = *ep
-	} else {
-		api_server.addr = api_endpoint
+//New will generate a new server instance for the given store back-end
+func New(be store.Store, ep string) *Server {
+	ap := &Server{
+		be:   be,
+		addr: apiEp,
 	}
-	api_server.s = negroni.New()
-	api_server.s.UseHandler(api)
-	return api_server
+
+	if len(ep) == 0 {
+		ap.addr = ep
+	}
+
+	restapi := mux.NewRouter()
+	restapi.NotFoundHandler = http.HandlerFunc(notFound)
+	restapi.HandleFunc("/api/kv/keys/", ap.KVkeys).Methods("GET")
+	restapi.HandleFunc("/api/kv/keys/{key}", ap.KVrequest).Methods("GET", "PUT", "POST", "DELETE")
+
+	ap.s = negroni.New()
+	ap.s.UseHandler(restapi)
+	return ap
 }

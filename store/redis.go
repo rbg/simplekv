@@ -1,40 +1,33 @@
 package store
 
-import redis "gopkg.in/redis.v3"
+import (
+	"github.com/apex/log"
+	redis "gopkg.in/redis.v3"
+)
 
-type redis_be struct {
+type redisBE struct {
 	write *redis.Client
 	read  *redis.Client
 }
 
-func NewRedis(write_ep string, read_ep string) Store {
+func NewRedis(wep string, rep string) Store {
 
-	be := &redis_be{}
+	be := &redisBE{}
 
 	// figure out how to setup
-	if len(read_ep) > 0 {
+	if len(rep) > 0 {
 		be.read = redis.NewClient(&redis.Options{
-			Addr:     read_ep,
+			Addr:     rep,
 			Password: "",
 			DB:       0,
 		})
 		if be.read == nil {
-			panic("failed to redis")
+			panic("failed to create readonly redis")
 		}
-		if pong, err := be.read.Ping().Result(); err != nil {
-			slog.Printf("READ Ping reply: %s", pong)
-		} else {
-			slog.ErrPrintf("READ Ping reply error: %s", err)
-			return nil
-		}
-	}
-
-	if len(write_ep) == 0 {
-		write_ep = "localhost:6379"
 	}
 
 	if be.write = redis.NewClient(&redis.Options{
-		Addr:     write_ep,
+		Addr:     wep,
 		Password: "",
 		DB:       0,
 	}); be.write == nil {
@@ -43,7 +36,7 @@ func NewRedis(write_ep string, read_ep string) Store {
 
 	pong := be.write.Ping()
 	if err := pong.Err(); err != nil {
-		slog.ErrPrintf("WRITE Ping reply error: %s", err)
+		log.Infof("WRITE Ping reply error: %s", err)
 		return nil
 	}
 
@@ -54,19 +47,19 @@ func NewRedis(write_ep string, read_ep string) Store {
 	return be
 }
 
-func (r *redis_be) Get(key string) ([]byte, error) {
+func (r *redisBE) Get(key string) ([]byte, error) {
 	result := r.read.HGet("root", key)
 	return result.Bytes()
 }
 
-func (r *redis_be) Put(key string, val []byte) error {
+func (r *redisBE) Put(key string, val []byte) error {
 	return r.write.HSet("root", key, string(val)).Err()
 }
 
-func (r *redis_be) Delete(key string) error {
+func (r *redisBE) Delete(key string) error {
 	return r.write.HDel("root", key).Err()
 }
 
-func (r *redis_be) Keys() ([]string, error) {
+func (r *redisBE) Keys() ([]string, error) {
 	return r.read.HKeys("root").Result()
 }

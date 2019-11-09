@@ -1,9 +1,7 @@
 package store
 
-import "github.com/stackengine/selog"
-
-var slog = selog.Register("store", 0)
-
+// Store represents what each store implementaion should
+// at least provide, it is an interface after all..
 type Store interface {
 	Keys() ([]string, error)
 	Get(key string) ([]byte, error)
