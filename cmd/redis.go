@@ -39,10 +39,10 @@ var redisCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(redisCmd)
 
-	redisCmd.PersistentFlags().String("rw", "localhost:6379", "Read/Write endpoint")
+	redisCmd.Flags().String("rw", "localhost:6379", "Read/Write endpoint")
 	viper.BindPFlag("rw", redisCmd.Flags().Lookup("rw"))
 
-	redisCmd.PersistentFlags().String("ro", "", "Read only endpoint")
+	redisCmd.Flags().String("ro", "", "Read only endpoint")
 	viper.BindPFlag("ro", redisCmd.Flags().Lookup("ro"))
 }
 
