@@ -16,7 +16,7 @@ type lungoBE struct {
 //Doc is what we will store the k/v as.
 type Doc struct {
 	Key   string
-	Value interface{}
+	Value []byte
 }
 
 //NewLungo gets you a new fake mongodb
@@ -40,7 +40,17 @@ func NewLungo(dbname, colln string) Store {
 }
 
 func (r *lungoBE) Get(key string) (results []byte, err error) {
-	return results, nil
+	var item Doc
+	log.Debugf("Getting key: %s", key)
+	found := r.col.FindOne(nil, bson.M{"key": key})
+
+	if err = found.Err(); err != nil {
+		log.Debugf("FindOne error: %s", err)
+		return results, err
+	}
+	err = found.Decode(&item)
+
+	return item.Value, nil
 }
 
 func (r *lungoBE) Put(key string, val []byte) error {
