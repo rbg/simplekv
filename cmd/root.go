@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"os"
 
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -56,6 +55,23 @@ func init() {
 
 	RootCmd.PersistentFlags().String("api", ":7800", "API Endpoint")
 	viper.BindPFlag("api", RootCmd.PersistentFlags().Lookup("api"))
+
+	// --------------
+	//    Airbrake
+	// --------------
+	// project id
+	RootCmd.PersistentFlags().Int64("ab_proj", 0, "Airbrake Project id")
+	viper.BindPFlag("ab_proj", RootCmd.PersistentFlags().Lookup("ab_proj"))
+	// project key
+	RootCmd.PersistentFlags().String("ab_key", "", "Airbrake Project key")
+	viper.BindPFlag("ab_key", RootCmd.PersistentFlags().Lookup("ab_key"))
+	// project environment
+	RootCmd.PersistentFlags().String("ab_env", "dev", "Airbrake Environment")
+	viper.BindPFlag("ab_env", RootCmd.PersistentFlags().Lookup("ab_env"))
+	// host URL
+	RootCmd.PersistentFlags().String("ab_url", "", "Airbrake URL")
+	viper.BindPFlag("ab_url", RootCmd.PersistentFlags().Lookup("ab_url"))
+	// --------------
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -64,14 +80,8 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		viper.AddConfigPath(home)
+		viper.AddConfigPath("$HOME")
+		viper.AddConfigPath(".")
 		viper.SetConfigName(".simplekv")
 	}
 

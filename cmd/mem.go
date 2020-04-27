@@ -21,7 +21,9 @@ package cmd
 // THE SOFTWARE.
 
 import (
+	"github.com/airbrake/gobrake"
 	"github.com/apex/log"
+	"github.com/rbg/simplekv/airbrake"
 	"github.com/rbg/simplekv/api"
 	"github.com/rbg/simplekv/store"
 	"github.com/spf13/cobra"
@@ -48,6 +50,8 @@ func memKV(cmd *cobra.Command, args []string) {
 
 	if be := store.NewMem(); be != nil {
 		if kvapi := api.New(be, viper.GetString("api")); kvapi != nil {
+			n := gobrake.NewNotice("MEM BE", nil, 0)
+			airbrake.GoBrake.Notify(n, nil)
 			kvapi.Run()
 		}
 	}

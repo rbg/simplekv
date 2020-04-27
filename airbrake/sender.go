@@ -1,4 +1,4 @@
-package main
+package airbrake
 
 // Copyright © 2019 Robert Gordon <rbg@openrbg.com>
 
@@ -21,9 +21,25 @@ package main
 // THE SOFTWARE.
 
 import (
-	"github.com/rbg/simplekv/cmd"
+	goab "github.com/airbrake/gobrake/v4"
+	"github.com/apex/log"
+	"github.com/spf13/viper"
 )
 
-func main() {
-	cmd.Execute()
+var (
+	// GoBrake is our interface to airbrake.
+	GoBrake *goab.Notifier
+)
+
+// Init should make happy notifier juju.
+func Init() {
+	GoBrake = goab.NewNotifierWithOptions(
+		&goab.NotifierOptions{
+			ProjectId:   viper.GetInt64("ab_proj"),
+			ProjectKey:  viper.GetString("ab_key"),
+			Environment: viper.GetString("ab_env"),
+			Host:        viper.GetString("ab_url"),
+		},
+	)
+	log.Infof("Here is the GoBrake struct: %+#v", GoBrake)
 }
