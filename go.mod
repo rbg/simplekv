@@ -6,7 +6,7 @@ require (
 	github.com/256dpi/lungo v0.1.3
 	github.com/airbrake/gobrake v3.7.4+incompatible
 	github.com/airbrake/gobrake/v4 v4.2.0
-	github.com/apex/log v1.1.1
+	github.com/apex/log v1.9.0
 	github.com/codegangsta/negroni v1.0.0
 	github.com/garyburd/redigo v1.6.0 // indirect
 	github.com/gorilla/mux v1.7.3
