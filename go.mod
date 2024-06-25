@@ -10,7 +10,7 @@ require (
 	github.com/codegangsta/negroni v1.0.0
 	github.com/garyburd/redigo v1.6.0 // indirect
 	github.com/gorilla/mux v1.7.3
-	github.com/spf13/cobra v0.0.5
+	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.5.0
 	github.com/tidwall/btree v0.0.0-20191029221954-400434d76274 // indirect
 	github.com/tidwall/buntdb v1.1.0
