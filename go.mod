@@ -3,7 +3,7 @@ module github.com/rbg/simplekv
 go 1.13
 
 require (
-	github.com/256dpi/lungo v0.1.3
+	github.com/256dpi/lungo v0.3.7
 	github.com/airbrake/gobrake v3.7.4+incompatible
 	github.com/airbrake/gobrake/v4 v4.2.0
 	github.com/apex/log v1.9.0
