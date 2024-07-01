@@ -9,7 +9,7 @@ require (
 	github.com/apex/log v1.9.0
 	github.com/codegangsta/negroni v1.0.0
 	github.com/garyburd/redigo v1.6.0 // indirect
-	github.com/gorilla/mux v1.7.3
+	github.com/gorilla/mux v1.8.1
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.5.0
 	github.com/tidwall/buntdb v1.3.1
